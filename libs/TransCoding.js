@@ -71,6 +71,7 @@ class TransCoding {
                 '-strict',
                 '-2',
                 '-crf 18',
+                '-preset ultrafast',
                 '-profile:v baseline',
                 '-s 640x360',
                 '-maxrate 400k',
@@ -78,7 +79,7 @@ class TransCoding {
                 '-pix_fmt yuv420p',
                 '-flags',
                 '-global_header',
-                '-hls_time 10',
+                '-hls_time 1',// 10
                 '-hls_list_size 6',
                 '-hls_wrap 10',
                 '-start_number 1'
