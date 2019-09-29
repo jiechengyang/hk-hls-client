@@ -1,0 +1,24 @@
+[
+  {
+    "name": "测试摄像头1",
+    "code": 10001,
+    "ip": "192.168.0.203",
+    "port": 554,
+    "username": "admin",
+    "password": "byt2016!",
+    "videoEncode": "h264",
+    "channel": "ch1",
+    "streamType": "main/av_stream"
+  },
+  {
+    "name": "测试摄像头1",
+    "code": 10002,
+    "ip": "192.168.0.221",
+    "port": 554,
+    "username": "admin",
+    "password": "admin123",
+    "videoEncode": "h264",
+    "channel": "ch1",
+    "streamType": "main/av_stream"
+  }
+]
