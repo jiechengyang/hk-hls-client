@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+// const fs = require('fs');
 const Utils = {
     isNull(val) {
         if (val === '' || val === null || val === undefined || val === 'undefined' || val.length === 0)
@@ -123,6 +124,14 @@ const Utils = {
             fs.rmdirSync(path);
         }
     },
+    fsExistsSync(fs, path) {
+        try {
+            fs.accessSync(path, fs.F_OK);
+        } catch (e) {
+            return false;
+        }
+        return true;
+    },
     sendHex(socket, utf8Data) {
         socket.write(this.toUTF8Hex(utf8Data), 'hex');
     },
@@ -151,8 +160,8 @@ const Utils = {
             strHash: value
         };
     },
-    saltHashStr(str) {
-        const salt = this.genRandomString(4);
+    saltHashStr(str, salt) {
+        salt = salt || this.genRandomString(4);
         /** Gives us salt of length 16 */
         let data = this.sha256(str, salt);
         return data.strHash;

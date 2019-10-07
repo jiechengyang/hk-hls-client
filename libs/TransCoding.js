@@ -4,9 +4,10 @@ const path = require('path');
 const ffmpeg = require('fluent-ffmpeg');
 
 class TransCoding {
-    constructor(socket, json, hlsConfig, videoList) {
+    constructor(socket, json, hlsConfig, root, videoList) {
         this.socket = socket;
         this.json = json;
+        this.root = root;
         this.hlsConfig = hlsConfig;
         this.hlsPath = path.dirname(__dirname) + '/' + hlsConfig.hlsPath;
         this.videoList = videoList;
@@ -32,7 +33,7 @@ class TransCoding {
         return tmp;
     }
 
-    transcoding(globalCmd, globalPlayers) {
+    transcoding(globalPlayers) {
         if (!this.issetVideo(this.json, this.videoList)) {
             Utils.sendHex(this.socket, JSON.stringify({data: null, code: 10003, msg: 'not found device'}));
             this.socket.end();
@@ -99,8 +100,7 @@ class TransCoding {
             .on('end', function () {
                 console.log('Finished processing');
             });
-        globalPlayers[this.json.code] = {file: file};
-        globalCmd = command;
+        globalPlayers[this.json.code] = {file: file, cmd: command};
         const outputFile = this.hlsConfig.hlsPath + file.replace(this.hlsPath, '').replace(/\\/g, '/');
         console.log('output file is:', outputFile);
         const utf8Data = JSON.stringify({data: {outputFile: outputFile}, code: 10000, msg: 'successed'});
@@ -113,8 +113,17 @@ class TransCoding {
 
     }
 
-    endTranscoding() {
-
+    endTranscoding(globalPlayers) {
+        let pathInfo = this.json.data;
+        let cameraIndexCode = pathInfo.dir.replace(/\\/g, '/').replace(this.hlsConfig.hlsPath + '/', '');
+        console.log('cameraIndexCode:', cameraIndexCode);
+        if (globalPlayers.hasOwnProperty(cameraIndexCode)) {
+            let item = globalPlayers[cameraIndexCode];
+            // Utils.delDir(fs, this.root + '\\' + pathInfo.dir);
+            // TODO: 杀死所有正在运行的ffmpeg进程
+            item.cmd.kill();
+            delete globalPlayers[cameraIndexCode];
+        }
     }
 
     illegal(msg) {

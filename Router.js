@@ -88,7 +88,7 @@ module.exports = [
                 let isBack = false;
                 while (true) {
                     console.log((Utils.getTimestamp() - timestamp) / 1000);
-                    if (Utils.getTimestamp() - timestamp >= 13.5 * 1000) {
+                    if (Utils.getTimestamp() - timestamp >= hlsConfig.m3u8Created * 1000) {
                         break;
                     }
 
@@ -100,7 +100,7 @@ module.exports = [
 
                 if (isBack) {
                     return JSON.stringify({
-                        data: {url: 'http://' + hlsConfig.hlsHost + ':' + hlsConfig.hlsPort + '/' + hlsConfig.hlsPath + '/' + fullname},
+                        data: {url: 'http://' + hlsConfig.hlsHostName + ':' + hlsConfig.hlsPort + '/' + hlsConfig.hlsPath + '/' + fullname},
                         code: 1000,
                         msg: 'successed'
                     });

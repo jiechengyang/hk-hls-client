@@ -13,7 +13,6 @@ const validator = require('validator');
 const HeartBeatPacket = require('./libs/HeartbeatPacket');
 const videoList = require('./videos');
 const TransCoding = require('./libs/TransCoding');
-let globalCmd = null;
 let globalPlayers = [];
 let globalWorkers = [];
 let heartBeat = HeartBeatPacket.getInstance();
@@ -41,27 +40,27 @@ let server = net.createServer((socket) => {
         console.log("the size of data is " + readSize);
         if (validator.isJSON(data)) {
             let json = JSON.parse(data);
-            let transcode = new TransCoding(socket, json, hlsConfig, videoList);
+            let transcode = new TransCoding(socket, json, hlsConfig, __dirname, videoList);
             if (!json.hasOwnProperty('type')) {
                 socket.isCheckHeart = false;
                 return transcode.illegal();
             }
 
             switch (json.type) {
-                case 'init':// api 初始化注册
+                case 'init':// api+hls 初始化注册
                     transcode.initApi();
                     break;
                 case 'request':// api 转码申请
-                    transcode.transcoding(globalCmd, globalPlayers);
+                    transcode.transcoding(globalPlayers);
                     break;
-                case 'ping':// api ping-echo
+                case 'ping':// api+hls ping-echo
                     transcode.getPingclient();
                     break;
-                case 'end' :// api 转码申请结束
+                case 'end' :// api+hls 转码申请结束
                     transcode.closeClient();
                     break;
-                case 'hlsRequest':// api hls服务端结束设备转码
-                    transcode.endTranscoding(socket, json);
+                case 'hlsRequest':// hls hls服务端结束设备转码
+                    transcode.endTranscoding(globalPlayers);
                     break;
                 default:
                     return transcode.illegal();
@@ -128,11 +127,12 @@ server.on("listening", () => {
 server.on("close", () => {
     console.log("server closed!");
     globalWorkers = [];
-    // TODO: 杀死所有正在运行的ffmpeg进程
-    globalCmd.kill();
     if (!Utils.isNull(globalPlayers)) {
         for (const code in globalPlayers) {
-            Utils.delDir(fs, hlsConfig.hlsPath + '/' + code);
+            let item = globalPlayers[code];
+            Utils.delDir(fs, hlsPath + '/' + code);
+            // TODO: 杀死所有正在运行的ffmpeg进程
+            item.cmd.kill();
         }
     }
 });
@@ -149,11 +149,13 @@ server.on("error", (err) => {
         }, 1000);
     }
 
-    // TODO: 杀死所有正在运行的ffmpeg进程
-    globalCmd.kill();
+
     if (!Utils.isNull(globalPlayers)) {
         for (const code in globalPlayers) {
-            Utils.delDir(fs, hlsConfig.hlsPath + '/' + code);
+            let item = globalPlayers[code];
+            Utils.delDir(fs, hlsPath + '/' + code);
+            // TODO: 杀死所有正在运行的ffmpeg进程
+            item.cmd.kill();
         }
     }
 });

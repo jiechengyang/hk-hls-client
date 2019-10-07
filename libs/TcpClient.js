@@ -23,6 +23,7 @@ module.exports = class TcpClient {
             this.events = [];
             this.successed = true;
             this.connNum = 5;
+            console.log('this.host:%s,this.port:%s', this.host, this.port);
             this.client = net.createConnection({host: host, port: port});//, this.onConnect
             // this.client.setTimeout(1000 * 60);
             this.client.on('error', this.onError.bind(this));
@@ -64,10 +65,13 @@ module.exports = class TcpClient {
     }
 
     onError(error) {
-        console.log(this.connNum);
+        // console.log(this.connNum);
         if (--this.connNum > 0) {
             this.client = net.createConnection({host: this.host, port: this.port}, this.onConnect);
+            // this.client.setTimeout(1000 * 60);
             this.client.on('error', this.onError.bind(this));
+        } else {
+            console.log('tcp server connect failed!!!');
         }
         // this.client.destroy(error);
     }
@@ -85,10 +89,9 @@ module.exports = class TcpClient {
             console.log('this.events[eventName]:', this.events[eventName]);
             console.log('calls:', calls);
             calls = this.events[eventName];
-
         }
-        console.log(calls);
-        return;
+
+        calls.push(call);
         this.events[eventName] = calls;
     }
 }

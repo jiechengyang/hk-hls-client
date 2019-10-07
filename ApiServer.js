@@ -73,7 +73,7 @@ const webServer = http.createServer((req, response) => {
 
 webServer.on('listening', () => {
     console.log('Api Server started, localAddress:%s,localPort:%s', webServer.address().address, webServer.address().port);
-    connentTcp();
+    connectTcp();
     pingEcho();
 });
 
@@ -104,10 +104,11 @@ webServer.listen({
     port: hlsConfig.apiPort
 });
 
-function connentTcp() {
+function connectTcp() {
     const TcpClient = require('./libs/TcpClient');
-    tcpClient = new TcpClient('192.168.0.35', 12860);
-    tcpClient.registerEventCall('connent', () => {
+    console.log('start connect tcp server....');
+    tcpClient = new TcpClient(hlsConfig.tcpHost, hlsConfig.tcpPort);
+    tcpClient.registerEventCall('connect', () => {
         let utf8Data = JSON.stringify({
             type: 'init',
             indexCode: hlsConfig.indexCode,
