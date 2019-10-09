@@ -101,35 +101,17 @@ server.on('listening', () => {
         if (keyLen) {
             for (let key in globalClient) {
                 let items = globalClient[key];
-                if (Object.keys(items).length === 0) {
-                    const abPath = absolutePath.replace(/\\/g, '/');
-                    const hPath = key.replace(/\\/g, '/');
-                    const m3u8Path = abPath + '/' + hPath;
-                    const ft = Utils.fsExistsSync(fs, m3u8Path);
-                    // console.log('ft:', ft);
-                    if (ft) {
-                        let pathInfo = path.parse(key);
-                        // TODO: tcp 发送取消推流
-                        let utf8Data = JSON.stringify({
-                            type: 'hlsRequest',
-                            data: pathInfo,
-                            msg: 'Send off transcoding service'
-                        });
-                        const hexData = Utils.trim(Utils.toUTF8Hex(utf8Data));
-                        tcp.client.write(hexData, 'hex');
-                        fs.unlinkSync(m3u8Path);
-                        const dir = pathInfo.dir.replace(/\\/g, '/');
-                        const tsPath = abPath + '/' + dir + '/';
-                        for (let i = 0; i < 10; i++) {
-                            const tsFile = tsPath + pathInfo.name + i + '.ts';
-                            const tf = Utils.fsExistsSync(fs, tsFile);
-                            // console.log('tf:', tf);
-                            if (tf) {
-                                console.log('tsFile:', tsFile);
-                                fs.unlinkSync(tsFile);
-                            }
-                        }
-                    }
+                if (Object.keys(items).length === 0 && Utils.fsExistsSync(fs, absolutePath + '\\' + key)) {
+                    // TODO: tcp 发送取消推流
+                    let pathInfo = path.parse(key);
+                    let utf8Data = JSON.stringify({
+                        type: 'hlsRequest',
+                        data: pathInfo,
+                        msg: 'Send off transcoding service'
+                    });
+                    const hexData = Utils.trim(Utils.toUTF8Hex(utf8Data));
+                    tcp.client.write(hexData, 'hex');
+                    // TODO: 这里也可以删除文件
                 }
             }
         }

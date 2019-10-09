@@ -39,7 +39,9 @@ module.exports = [
 
             if (video) {
                 const DateFormat = require('dateformat');
-                video['filename'] = DateFormat(new Date(), 'yyyymmddHHMMss');
+                const subPath = DateFormat(new Date(), 'yyyymmddHHMMss');
+                video['subPath'] = subPath;
+                video['filename'] = subPath + '/' + Utils.genRandomString(6);
                 const hlsPath = __dirname + '/' + hlsConfig.hlsPath;
                 const fullname = video.code + '/' + video['filename'] + '.m3u8';
                 let fpth = hlsPath + '/' + fullname;

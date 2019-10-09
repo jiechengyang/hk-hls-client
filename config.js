@@ -11,5 +11,5 @@ module.exports = {
     heartTime: 1000 * 60 * 5,
     hlsHeartTime: 1000 * 60 * 1,
     indexCode: 'pvcMB!',
-    m3u8Created: 14,
+    m3u8Created: 15,
 };

@@ -45,8 +45,9 @@ class TransCoding {
             this.socket.end();
         }
 
-        if (!fs.existsSync(filepath)) {
-            fs.mkdir(filepath, {recursive: true}, (err) => {
+        const path = filepath + '/' + this.json.subPath;
+        if (!fs.existsSync(path)) {
+            fs.mkdir(path, {recursive: true}, (err) => {
                 !Utils.isNull(err) && console.error('mkdir filepath: ', err);
             });
         }
@@ -72,8 +73,9 @@ class TransCoding {
                 '-strict',
                 '-2',
                 '-crf 18',
-                '-preset ultrafast',
+                '-preset fast',//ultrafast
                 '-profile:v baseline',
+                '-tune zerolatency',
                 '-s 640x360',
                 '-maxrate 400k',
                 '-bufsize 1835k',
@@ -115,14 +117,29 @@ class TransCoding {
 
     endTranscoding(globalPlayers) {
         let pathInfo = this.json.data;
-        let cameraIndexCode = pathInfo.dir.replace(/\\/g, '/').replace(this.hlsConfig.hlsPath + '/', '');
+        // public/videos/10001/20191009222009/db577e.m3u8
+        let dirs = pathInfo.dir.replace(/\\/g, '/').split('/');
+        const cameraIndexCode = dirs[dirs.length - 2];
         console.log('cameraIndexCode:', cameraIndexCode);
         if (globalPlayers.hasOwnProperty(cameraIndexCode)) {
             let item = globalPlayers[cameraIndexCode];
+            this.clearM3u8(pathInfo);
             // Utils.delDir(fs, this.root + '\\' + pathInfo.dir);
             // TODO: 杀死所有正在运行的ffmpeg进程
             item.cmd.kill();
             delete globalPlayers[cameraIndexCode];
+        }
+    }
+
+    clearM3u8(pathInfo) {
+        const absolutePath = path.dirname(__dirname);
+        const selfDir = absolutePath + '/' + pathInfo.dir;
+        const m3u8Path = selfDir + '/' + pathInfo.base;
+        const ft = Utils.fsExistsSync(fs, m3u8Path);
+        console.log('selfDir:', selfDir);
+        console.log('ft:', ft);
+        if (ft) {
+            Utils.delDir(fs, selfDir);
         }
     }
 
