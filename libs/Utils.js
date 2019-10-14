@@ -168,6 +168,15 @@ const Utils = {
     },
     getTimestamp() {
         return new Date().getTime();
+    },
+    generateRTSPUrl(params) {
+        return "rtsp://"
+            + params['username'] + ":"
+            + params['password'] + "@"
+            + params.ip + "/"
+            + (this.isNull(params.videoEncode) ? "h264" : params.videoEncode.toString()) + "/"
+            + params.channel.toString() + "/"
+            + params.streamType;
     }
 };
 

@@ -77,3 +77,28 @@ var command = ffmpeg('rtsp://admin:byt2016!@192.168.0.203/h264/ch1/main/av_strea
     .on('end', function () {
         console.log('Finished processing');
     }).run();
+
+
+
+// '-fflags nobuffer',
+//     '-threads 12',
+//     '-c:v libx264',
+//     '-c:a aac',
+//     '-ac 1',
+//     '-strict',
+//     '-2',
+//     '-crf 18',
+//     // '-preset fast',//ultrafast
+//     '-profile:v baseline',
+//     // '-tune zerolatency',
+//     '-level 3.0',
+//     '-s 640x360',
+//     '-maxrate 400k',
+//     '-bufsize 1835k',
+//     '-pix_fmt yuv420p',
+//     '-flags',
+//     '-global_header',
+//     '-hls_time 10',// 10 or 1
+//     '-hls_list_size 6',
+//     '-hls_wrap 15',// 10 or 15
+//     '-start_number 0'// 1 or 0

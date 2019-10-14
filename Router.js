@@ -14,6 +14,7 @@ const func = () => {
 const Utils = require('./libs/Utils');
 const validator = require('validator');
 const querystring = require('querystring');
+const ffmpeg = require('fluent-ffmpeg');
 
 module.exports = [
     {
@@ -60,6 +61,9 @@ module.exports = [
                 video['type'] = 'request';
                 let utf8Data = JSON.stringify(video);
                 const hexData = Utils.trim(Utils.toUTF8Hex(utf8Data));
+                if (!controller.tcpClient.isConnected) {
+                    return false;
+                }
                 console.log('send msg');
                 controller.tcpClient.client.write(hexData, 'hex');
                 controller.tcpClient.registerEventCall('data', (data) => {
@@ -86,11 +90,11 @@ module.exports = [
                 //     return controller.endJSon({data: null, msg: '转码失败', code: 10003});
                 // }
                 let timestamp = Utils.getTimestamp();
-                let num = 0;
                 let isBack = false;
                 while (true) {
-                    console.log((Utils.getTimestamp() - timestamp) / 1000);
-                    if (Utils.getTimestamp() - timestamp >= hlsConfig.m3u8Created * 1000) {
+                    let diff = Utils.getTimestamp() - timestamp;
+                    console.log(diff / 1000);
+                    if (diff >= hlsConfig.m3u8Created * 1000) {
                         break;
                     }
 
@@ -111,6 +115,111 @@ module.exports = [
                 }
             } else {
                 return controller.endJSon({data: null, msg: '找不到该摄像头', code: 10003});
+            }
+        }
+    },
+    {
+        route: 'api/video/thumb',
+        verbs: ['GET'],
+        func: (controller) => {
+            const queryParams = controller.getQueryParams();
+            let code = queryParams['code'];
+            const videoList = require('./videos');
+            let video = null;
+            for (let key in videoList) {
+                if (parseInt(videoList[key].code) === parseInt(code)) {
+                    video = videoList[key];
+                    break;
+                }
+            }
+
+            if (!video) {
+                return controller.endJSon({data: null, msg: '找不到该摄像头', code: 10003});
+            }
+
+            const fs = require('fs');
+            const hlsConfig = require('./config');
+            const folder = hlsConfig.imageDataFolder;
+            // if (!fs.existsSync(folder)) {
+            //     fs.mkdir(folder, {recursive: true}, (err) => {
+            //         console.log(error);
+            //     });
+            // }
+
+            let filename = code + '@' + Utils.getTimestamp() + '.jpg';
+            const fullName = folder + '\\' + filename;
+            try {
+                if (!controller.tcpClient.isConnected) {
+                    throw new Error("tcp not connect");
+                }
+
+                const rtspUrl = Utils.generateRTSPUrl(video);
+                let utf8Data = {
+                    type: 'thumbImg',
+                    code: code,
+                    filename: filename
+                };
+
+                utf8Data = JSON.stringify(utf8Data);
+                const hexData = Utils.trim(Utils.toUTF8Hex(utf8Data));
+                controller.tcpClient.client.write(hexData, 'hex');
+                // TODO: 可以提交给tcp处理，然后使用white true；tcp服务需要定时清理图片（比如：每天晚上0点清理生成的文件）
+                // const fmd = ffmpeg(rtspUrl).addOptions([
+                //     '-y',
+                //     '-f image2',
+                //     '-ss 10',
+                //     '-t 0.001',
+                //     '-s 640*320'
+                // ]).output(fullName)
+                //     .on('start', () => {
+                //         console.log('start genrate image');
+                //     }).on('filenames', (filenames) => {
+                //         console.log('Will generate ' + filenames.join(', '))
+                //     }).on('end', () => {
+                //         console.log('end genrated image');
+                //     }).run();
+                // ffmpeg(rtspUrl)
+                //     .on('filenames', function (filenames) {
+                //         console.log('Will generate ' + filenames.join(', '))
+                //     })
+                //     .on('end', function () {
+                //         console.log('Screenshots taken');
+                //     })
+                //     .withFrames(20)
+                //     .takeScreenshots({
+                //         count: 1,
+                //         timemarks: ['1'],
+                //         filename: filename,
+                //         size: '640x480'
+                //     }, folder, function (err, filenames) {
+                //         console.log('screenshots were saved at:', filenames);
+                //     });
+                const dirs = folder.split("\\");
+                const returnData = hlsConfig.imageDataServer + dirs[dirs.length - 1] + '/' + filename;
+                console.log('returnData:', returnData);
+                return controller.endJSon({data: returnData, msg: '', code: 10000});
+                // let isCreated = false;
+                // let timestamp = Utils.getTimestamp();
+                // while (true) {
+                //     let diff = Utils.getTimestamp() - timestamp;
+                //     console.log(diff / 1000);
+                //     if (diff >= hlsConfig.thumbCreated * 1000) {
+                //         throw new Error("timeout...");
+                //     }
+                //
+                //     if (Utils.fsExistsSync(fs, fullName)) {
+                //         isCreated = true;
+                //         break;
+                //     }
+                // }
+                //
+                // if (isCreated) {
+                //     return controller.endJSon({data: returnData, msg: '', code: 10000});
+                // }
+
+            } catch (e) {
+                console.error(e);
+                return controller.endJSon({data: null, msg: e.toString(), code: 10003});
             }
         }
     },
@@ -140,13 +249,6 @@ module.exports = [
         verbs: ['POST'],
         func: () => {
 
-        }
-    },
-    {
-        route: 'api/video/view',
-        verbs: ['GET'],
-        func: (id) => {
-            console.log('show id is:', id);
         }
     }
 ];

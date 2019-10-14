@@ -22,8 +22,9 @@ module.exports = class TcpClient {
             this.port = port;
             this.events = [];
             this.successed = true;
+            this.isConnected = false;
             this.connNum = 5;
-            console.log('this.host:%s,this.port:%s', this.host, this.port);
+            console.log('tcp.host:%s,tcp.port:%s', this.host, this.port);
             this.client = net.createConnection({host: host, port: port});//, this.onConnect
             // this.client.setTimeout(1000 * 60);
             this.client.on('error', this.onError.bind(this));
@@ -35,6 +36,7 @@ module.exports = class TcpClient {
 
     onConnect() {
         console.log('已连接到服务器:');
+        this.isConnected = true;
         if (!Utils.isNull(this.events) && this.events.indexOf('connect') >= 0 && !Utils.isNull(this.events['connect'])) {
             let events = this.events['connect'];
             for (let c in events) {
@@ -45,6 +47,7 @@ module.exports = class TcpClient {
     }
 
     onData(data) {
+        this.isConnected = true;
         // console.log(data.toString());
         // this.client.end();
         if (!Utils.isNull(this.events) && this.events.indexOf('data') >= 0 && !Utils.isNull(this.events['data'])) {
@@ -57,15 +60,18 @@ module.exports = class TcpClient {
 
     onTimeout() {
         console.log('服务器连接超时');
+        this.isConnected = false;
         this.client.end();
     }
 
     onEnd() {
+        this.isConnected = false;
         console.log('已从服务器断开');
     }
 
     onError(error) {
         // console.log(this.connNum);
+        this.isConnected = false;
         if (--this.connNum > 0) {
             this.client = net.createConnection({host: this.host, port: this.port}, this.onConnect);
             // this.client.setTimeout(1000 * 60);

@@ -163,6 +163,7 @@ const hls = new hlsServer(server, {
         getManifestStream: function (req, callback) {
             console.log('getManifestStream:');
             // TODO: 存储所有hls请求的客户端, key1:ip+port key2: m3u8文件名
+            // TODO: 只要有请求到，就把该文件发送给tcp，tcp那边有个定时器监听是否转码的服务有人看，如果这里一直不发请求只到程序设定的时间，那就表示没人看了，则关闭
             const socket = req.socket;
             socket.lastMessageTime = Utils.getTimestamp();
             socket.m3u8Path = req.filePath;
@@ -185,6 +186,13 @@ const hls = new hlsServer(server, {
 
             console.log('req.filePath:', req.filePath);
             callback(null, fs.createReadStream(req.filePath, { bufferSize: 64 * 1024 }));
+            let utf8Data = JSON.stringify({
+                type: 'checkIsPlayIng',
+                data: req.filePath,
+                msg: '视频正在播放中'
+            });
+            const hexData = Utils.trim(Utils.toUTF8Hex(utf8Data));
+            tcpClient.client.write(hexData, 'hex');
         },
         getSegmentStream: function (req, callback) {
             callback(null, fs.createReadStream(req.filePath));

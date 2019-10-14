@@ -62,6 +62,12 @@ let server = net.createServer((socket) => {
                 case 'hlsRequest':// hls hls服务端结束设备转码
                     transcode.endTranscoding(globalPlayers);
                     break;
+                case 'checkIsPlayIng':// 实时监测视频是否正在播放
+                    transcode.checkIsPlayIng(globalPlayers);
+                    break;
+                case 'thumbImg':// 获取视频某一帧的图片
+                    transcode.thumbImg();
+                    break;
                 default:
                     return transcode.illegal();
             }
@@ -121,6 +127,7 @@ server.listen({host: hlsConfig.tcpHost, port: hlsConfig.tcpPort}, () => {
 server.on("listening", () => {
     console.log("Creat server on tcp://" + hlsConfig.tcpHost + ':' + hlsConfig.tcpPort + '/');
     heartBeat.detectionLater(globalWorkers, hlsConfig.heartTime);
+    heartBeat.CheckPlaying(globalPlayers, hlsConfig.outHeartTime);
 });
 
 /* 设置关闭时的回调函数 */
@@ -135,6 +142,11 @@ server.on("close", () => {
             item.cmd.kill();
         }
     }
+
+    clearInterval(heartBeat.timer);
+    heartBeat.timer = null;
+    clearInterval(heartBeat.checkIsPlayerTimer);
+    heartBeat.checkIsPlayerTimer = null;
 });
 
 /* 设置错误时的回调函数 */
@@ -158,4 +170,9 @@ server.on("error", (err) => {
             item.cmd.kill();
         }
     }
+
+    clearInterval(heartBeat.timer);
+    heartBeat.timer = null;
+    clearInterval(heartBeat.checkIsPlayerTimer);
+    heartBeat.checkIsPlayerTimer = null;
 });
