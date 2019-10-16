@@ -16,13 +16,14 @@ const TransCoding = require('./libs/TransCoding');
 let globalPlayers = [];
 let globalWorkers = [];
 let heartBeat = HeartBeatPacket.getInstance();
-const hlsPath = __dirname + '/' + hlsConfig.hlsPath;
-
-if (!fs.existsSync(hlsPath)) {
-    fs.mkdir(hlsPath, {recursive: true}, (err) => {
-        !Utils.isNull(err) && console.error('mkdir: ', err);
-    });
-}
+let hlsPath = __dirname + '\\' + hlsConfig.hlsPath;
+hlsPath = hlsPath.replace('/', '\\', hlsPath);
+// if (!fs.existsSync(hlsPath)) {
+//     fs.mkdir(hlsPath, {recursive: true}, (err) => {
+//         !Utils.isNull(err) && console.error('mkdir error: ', err);
+//     });
+// }
+Utils.mkDirs(hlsPath, () =>{})
 
 let server = net.createServer((socket) => {
     socket.on('data', (data) => {

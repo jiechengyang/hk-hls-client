@@ -1,5 +1,6 @@
 const crypto = require('crypto');
-// const fs = require('fs');
+const fs = require('fs');
+const path = require('path');
 const Utils = {
     isNull(val) {
         if (val === '' || val === null || val === undefined || val === 'undefined' || val.length === 0)
@@ -177,6 +178,19 @@ const Utils = {
             + (this.isNull(params.videoEncode) ? "h264" : params.videoEncode.toString()) + "/"
             + params.channel.toString() + "/"
             + params.streamType;
+    },
+    mkDirs(dirName, callback) {
+        const that = this;
+        fs.exists(dirName, function (exists) {
+            if (exists) {
+                typeof callback === 'function' && callback();
+            } else {
+                that.mkDirs(path.dirname(dirName), function () {
+                    fs.mkdir(dirName, callback);
+                    console.log('在' + path.dirname(dirName) + '目录创建好' + dirName + '目录');
+                });
+            }
+        });
     }
 };
 

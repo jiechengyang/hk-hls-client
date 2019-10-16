@@ -11,11 +11,13 @@ const func = () => {
             return JSON.stringify({data: 'test', code: 10000, msg: 'This is Test Data'});
     }
 };
+const fs = require('fs');
+const videoList = require('./videos');
 const Utils = require('./libs/Utils');
-const validator = require('validator');
 const querystring = require('querystring');
-const ffmpeg = require('fluent-ffmpeg');
-
+const hlsConfig = require('./config');
+const FileCache = require('./libs/FileCache');
+const cache = FileCache.getSingleton(__dirname + '/cache');
 module.exports = [
     {
         route: 'api/video/get-live-url',
@@ -27,9 +29,6 @@ module.exports = [
 
             // let [req, res, body] = arguments;
             let jsonData = querystring.parse(controller.getBody());
-            const videoList = require('./videos');
-            const hlsConfig = require('./config');
-            const fs = require('fs');
             let video = null;
             for (let key in videoList) {
                 if (parseInt(videoList[key].code) === parseInt(jsonData.code.toString())) {
@@ -39,6 +38,20 @@ module.exports = [
             }
 
             if (video) {
+                if (!Utils.isNull(jsonData.noCache) && jsonData.noCache == 1) {
+                    cache.del(video.code);
+                }
+
+                const cacheUrl = cache.get(video.code);
+                console.log(cacheUrl);
+                // return;
+                if (!Utils.isNull(cacheUrl)) {
+                    return JSON.stringify({
+                        data: {url: cacheUrl},
+                        code: 1000,
+                        msg: 'successed'
+                    });
+                }
                 const DateFormat = require('dateformat');
                 const subPath = DateFormat(new Date(), 'yyyymmddHHMMss');
                 video['subPath'] = subPath;
@@ -70,25 +83,6 @@ module.exports = [
                     data = data.toString('utf8');
                     console.log('data:', data);
                 });
-                // if (validator.isJSON(data)) {
-                //     let res = JSON.parse(data);
-                //     let da = res.data;
-                //     if (res.code === 10000 && !Utils.isNull(da.outputFile)) {
-                //         while (true) {
-                //             if (fs.existsSync(da.outputFile)) {
-                //                 return JSON.stringify({
-                //                     data: {url: 'http://' + hlsConfig.httpHost + ':' + hlsConfig.httpPort + '/' + da.outputFile},
-                //                     code: 1000,
-                //                     msg: 'successed'
-                //                 });
-                //             }
-                //         }
-                //     } else {
-                //         return controller.endJSon({data: null, msg: '转码失败', code: 10003});
-                //     }
-                // } else {
-                //     return controller.endJSon({data: null, msg: '转码失败', code: 10003});
-                // }
                 let timestamp = Utils.getTimestamp();
                 let isBack = false;
                 while (true) {
@@ -105,8 +99,10 @@ module.exports = [
                 }
 
                 if (isBack) {
+                    const rtspUrl = 'http://' + hlsConfig.hlsHostName + ':' + hlsConfig.hlsPort + '/' + hlsConfig.hlsPath + '/' + fullname;
+                    cache.set(video.code, rtspUrl);
                     return JSON.stringify({
-                        data: {url: 'http://' + hlsConfig.hlsHostName + ':' + hlsConfig.hlsPort + '/' + hlsConfig.hlsPath + '/' + fullname},
+                        data: {url: rtspUrl},
                         code: 1000,
                         msg: 'successed'
                     });
@@ -124,7 +120,6 @@ module.exports = [
         func: (controller) => {
             const queryParams = controller.getQueryParams();
             let code = queryParams['code'];
-            const videoList = require('./videos');
             let video = null;
             for (let key in videoList) {
                 if (parseInt(videoList[key].code) === parseInt(code)) {
@@ -137,8 +132,6 @@ module.exports = [
                 return controller.endJSon({data: null, msg: '找不到该摄像头', code: 10003});
             }
 
-            const fs = require('fs');
-            const hlsConfig = require('./config');
             const folder = hlsConfig.imageDataFolder;
             // if (!fs.existsSync(folder)) {
             //     fs.mkdir(folder, {recursive: true}, (err) => {
@@ -164,36 +157,6 @@ module.exports = [
                 const hexData = Utils.trim(Utils.toUTF8Hex(utf8Data));
                 controller.tcpClient.client.write(hexData, 'hex');
                 // TODO: 可以提交给tcp处理，然后使用white true；tcp服务需要定时清理图片（比如：每天晚上0点清理生成的文件）
-                // const fmd = ffmpeg(rtspUrl).addOptions([
-                //     '-y',
-                //     '-f image2',
-                //     '-ss 10',
-                //     '-t 0.001',
-                //     '-s 640*320'
-                // ]).output(fullName)
-                //     .on('start', () => {
-                //         console.log('start genrate image');
-                //     }).on('filenames', (filenames) => {
-                //         console.log('Will generate ' + filenames.join(', '))
-                //     }).on('end', () => {
-                //         console.log('end genrated image');
-                //     }).run();
-                // ffmpeg(rtspUrl)
-                //     .on('filenames', function (filenames) {
-                //         console.log('Will generate ' + filenames.join(', '))
-                //     })
-                //     .on('end', function () {
-                //         console.log('Screenshots taken');
-                //     })
-                //     .withFrames(20)
-                //     .takeScreenshots({
-                //         count: 1,
-                //         timemarks: ['1'],
-                //         filename: filename,
-                //         size: '640x480'
-                //     }, folder, function (err, filenames) {
-                //         console.log('screenshots were saved at:', filenames);
-                //     });
                 const dirs = folder.split("\\");
                 const returnData = hlsConfig.imageDataServer + dirs[dirs.length - 1] + '/' + filename;
                 console.log('returnData:', returnData);

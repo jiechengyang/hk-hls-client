@@ -36,28 +36,28 @@ var StreamHandler = function (url, name) {
     });
 }
 util.inherits(StreamHandler, EventEmitter);
-var StreamHandler = function(url, name){
-
-    // CREATE FFMPEG PROCESS
-    this.ffmpeg = spawn('ffmpeg', args);
-
-    // GRAB STREAM
-    http.get(url, (res) => {
-        res.pipe(this.ffmpeg.stdin);
-    });
-
-    // WRITE TO FILE
-    this.ffmpeg.stdout.pipe(fs.createWriteStream(name));
-
-    this.ffmpeg.on("exit", () => {
-        console.log("Finished:", name);
-    });
-
-    //DEBUG
-    this.ffmpeg.stdout.on("data", (data) => {
-        console.error(name, "received data");
-    });
-}
+// var StreamHandler = function(url, name){
+//
+//     // CREATE FFMPEG PROCESS
+//     this.ffmpeg = spawn('ffmpeg', args);
+//
+//     // GRAB STREAM
+//     http.get(url, (res) => {
+//         res.pipe(this.ffmpeg.stdin);
+//     });
+//
+//     // WRITE TO FILE
+//     this.ffmpeg.stdout.pipe(fs.createWriteStream(name));
+//
+//     this.ffmpeg.on("exit", () => {
+//         console.log("Finished:", name);
+//     });
+//
+//     //DEBUG
+//     this.ffmpeg.stdout.on("data", (data) => {
+//         console.error(name, "received data");
+//     });
+// }
 
 // TESTING
 var vidUrl = 'http://www.sample-videos.com/video/mp4/720/big_buck_bunny_720p_1mb.mp4';

@@ -1,12 +1,14 @@
 const Utils = require('./Utils');
 const fs = require('fs');
 const path = require('path');
-
+const hlsConfig = require('../config');
+const FileCache = require('./FileCache');
 class HeartbeatPacket {
     constructor() {
         this.state = null;
         this.instance = null;
         this.timer = null;
+        this.cache = FileCache.getSingleton(path.dirname(__dirname) + '/cache');
         this.checkIsPlayerTimer = null;
         // Object.defineProperty(this, "state", {
         //     get: () => {
@@ -77,6 +79,9 @@ class HeartbeatPacket {
             //
             if (timeNow - players[pkey]['lastMessageTime'] > outTime) {
                 players[pkey].cmd.kill();
+                const arr = pkey.split('#');
+                console.log('arr:', arr)
+                that.cache.del(arr[0]);
                 setTimeout((that, item) => {
                     that.clearM3u8(item.file);
                     delete players[pkey];

@@ -2,13 +2,15 @@ const Utils = require('./Utils');
 const fs = require('fs');
 const path = require('path');
 const ffmpeg = require('fluent-ffmpeg');
-
+const FileCache = require('./FileCache');
 class TransCoding {
     constructor(socket, json, hlsConfig, root, videoList) {
         this.socket = socket;
         this.json = json;
         this.root = root;
         this.hlsConfig = hlsConfig;
+        this.cache = FileCache.getSingleton(path.dirname(__dirname) + '/cache');
+
         this.hlsPath = path.dirname(__dirname) + '/' + hlsConfig.hlsPath;
         this.videoList = videoList;
     }
@@ -135,6 +137,8 @@ class TransCoding {
         if (globalPlayers.hasOwnProperty(key)) {//hasOwnProperty
             let item = globalPlayers[key]
             // Utils.delDir(fs, this.root + '\\' + pathInfo.dir);
+            // TODO: clear cache
+            this.cache.del(cameraIndexCode);
             // TODO: 杀死所有正在运行的ffmpeg进程
             item.cmd.kill();
             delete globalPlayers[cameraIndexCode];

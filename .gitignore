@@ -47,3 +47,6 @@ package-lock.json
 ./test.avi
 ./test.mp4
 public/*
+cache/*
+config.js
+videos.json

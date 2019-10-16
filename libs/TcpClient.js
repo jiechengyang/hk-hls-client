@@ -78,6 +78,7 @@ module.exports = class TcpClient {
             this.client.on('error', this.onError.bind(this));
         } else {
             console.log('tcp server connect failed!!!');
+            console.error(error);
         }
         // this.client.destroy(error);
     }

@@ -65,8 +65,8 @@ const webServer = http.createServer((req, response) => {
         console.log('timeout!!!');
     });
 
-    controller.request.on('close', (had_error) => {
-        console.log('client disconnet:', had_error);
+    controller.request.on('close', () => {
+        console.log('http client disconnet');
     });
 
 });
@@ -135,5 +135,5 @@ function pingEcho() {
         });
         const hexData = Utils.trim(Utils.toUTF8Hex(utf8Data));
         tcp.client.write(hexData, 'hex');
-    }, hlsConfig.heartTime <= diff ?  diff - 10 * 1000 : hlsConfig.heartTime - diff, tcpClient);
+    }, hlsConfig.heartTime <= diff ? diff - 10 * 1000 : hlsConfig.heartTime - diff, tcpClient);
 }
