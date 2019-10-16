@@ -48,7 +48,7 @@
         m3u8Created: 20,// 等待生成m3u8文件时间（单位：秒）
         thumbCreated: 10,// 等待生成视频第一帧图片时间（单位：秒）
         imageDataFolder: "D:\\www\\ImgData\\Camera",// 视频帧图片存放目录
-        imageDataServer: 'http://39.206.56.249:8003/',// 图片服务器
+        imageDataServer: 'http://192.168.0.102:8003/',// 图片服务器
         redis: {// redis配置，暂时不需要
             host: '127.0.0.1',
             port: 6379
