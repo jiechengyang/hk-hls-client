@@ -4,11 +4,45 @@ const child_process = require('child_process');
 const util = require('util');
 const EventEmitter = require('events').EventEmitter;
 const net = require("net");
+const spawn = child_process.spawn;
+const fs = require('fs');
+const fluentFfmpeg = require('fluent-ffmpeg');
 // These never change...
 const spawn = child_process.spawn;
+const Stream = require('node-rtsp-stream');
 let server = net.createServer((socket) => {
     socket.on('data', (data) => {
         console.log('data:', data);
+        let ffmpeg  = null;
+        if (data == 1) {
+            // stream = new Stream({
+            //     name: 'name',
+            //     streamUrl: 'rtsp://admin:byt2016!@192.168.0.203/h264/ch1/main/av_stream',
+            //     wsPort: 19999,
+            //     // ffmpegOptions: { // options ffmpeg flags
+            //     //     '-stats': '', // an option with no neccessary value uses a blank string
+            //     //     '-r': '30', // options with required values specify the value after the key
+            //     //     '-s': '160x120',
+            //     // }
+            // })
+            ffmpeg = pools[0];
+            ffmpeg.stdout.on('data', (data) => {
+                console.log('mpeg1data', data)
+            })
+
+            ffmpeg.stderr.on('data', (data) => {
+                console.log('ffmpegStderr', data)
+            })
+
+            ffmpeg.on('exit', (code, signal) => {
+                if (code === 1) {
+                    console.error('RTSP stream exited with error')
+                }
+            })
+
+            ffmpeg.stdout.pipe(fs.createWriteStream('test.m3u8'));
+        }
+>>>>>>> a14e9331ba3ce9958758cd2d8ea2733022945395
     });
 
     socket.on('end', () => {
@@ -48,7 +82,7 @@ server.listen({host: '0.0.0.0', port: 12346}, () => {
 server.on("listening", () => {
     console.log('listening');
     const args = ['-i', 'pipe:0', '-f', 'mp3', '-ac', '2', '-ab', '128k', '-acodec', 'libmp3lame', 'pipe:1'];
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 3; i++) {
         const ffmpeg = spawn('ffmpeg', args);
         pools[i] = ffmpeg;
     }

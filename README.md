@@ -11,7 +11,11 @@
 
 ## 使用如下
 
+<<<<<<< HEAD
  * 配置json
+=======
+ * 配置videos.json(配置路径与package.json同级)
+>>>>>>> a14e9331ba3ce9958758cd2d8ea2733022945395
     目前是把摄像头配置在文件里，存哪里可以自行修改；下面展示的是海康摄像头的参数
     
 ```json
@@ -28,7 +32,11 @@
       }
 ```
     
+<<<<<<< HEAD
  * 配置config.js
+=======
+ * 配置config.js(配置路径与package.json同级)
+>>>>>>> a14e9331ba3ce9958758cd2d8ea2733022945395
  
     ```js
     module.exports = {

@@ -18,6 +18,35 @@ const querystring = require('querystring');
 const hlsConfig = require('./config');
 const FileCache = require('./libs/FileCache');
 const cache = FileCache.getSingleton(__dirname + '/cache');
+<<<<<<< HEAD
+=======
+
+function AddVolume(volumeFile, volume, outputVolumeFile) {
+    const ffmpeg = require('fluent-ffmpeg');
+    console.log('volumeFile:%s,volume:%s', volumeFile, volume);
+    let command = ffmpeg(volumeFile, {timeout: 432000}).addOptions([
+        "-af volume=" + volume
+    ]).output(outputVolumeFile)
+        .on('start', () => {
+            console.log('start amplify volume ing !!!' + "\n");
+        })
+        .on('error', function (err) {
+            console.log('An error occurred: ' + err.message);
+        })
+        .on('end', function () {
+            console.log('Finished processing');
+            fs.unlink(volumeFile, (err) => {
+                if (err) throw err;
+                console.log('文件已删除');
+                fs.rename(outputVolumeFile, volumeFile, (err) => {
+                    if (err) throw err;
+                    console.log('文件重命名成功');
+                });
+            });
+        }).run();
+}
+
+>>>>>>> a14e9331ba3ce9958758cd2d8ea2733022945395
 module.exports = [
     {
         route: 'api/video/get-live-url',
@@ -187,6 +216,45 @@ module.exports = [
         }
     },
     {
+<<<<<<< HEAD
+=======
+        route: 'api/audio/amplify-volume',
+        verbs: ['POST'],
+        func: (controller) => {
+            let jsonData = querystring.parse(controller.getBody());
+            if (Utils.isNull(jsonData.file)) {
+                return controller.endJSon({data: {}, msg: '请带上file参数', code: 10003});
+            }
+            let volume = 10;
+            if (!Utils.isNull(jsonData.volume)) {
+                volume = parseFloat(jsonData.volume);
+            }
+
+            let file = jsonData.file;
+            file = file.replace("/", "\\", file);
+            let arr = file.split('.');
+            let arr2 = arr[0].split("\\");
+            let ext = arr[arr.length - 1];
+            if (Utils.fsExistsSync(fs, file)) {
+                let filename = Utils.getTimestamp() + '.' + ext;
+                let outputVolumeFile = arr2[0] + "\\" + filename;
+                AddVolume(file, volume, outputVolumeFile);
+                return controller.endJSon({data: {}, msg: '成功', code: 10000});
+            }
+
+            let volumeFile = hlsConfig.audio.volumePath + "\\" + jsonData.file;
+            if (!Utils.fsExistsSync(fs, volumeFile)) {
+                return controller.endJSon({data: {}, msg: '音频文件不存在', code: 10003});
+            }
+
+            let filename = Utils.getTimestamp() + '.' + ext;
+            let outputVolumeFile = hlsConfig.audio.volumePath + "\\" + filename;
+            AddVolume(volumeFile, volume, outputVolumeFile);
+            return controller.endJSon({data: {}, msg: '成功', code: 10000});
+        }
+    },
+    {
+>>>>>>> a14e9331ba3ce9958758cd2d8ea2733022945395
         route: 'api/video/list',
         verbs: ['GET', 'POST'],
         func: () => {

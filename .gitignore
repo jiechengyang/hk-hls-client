@@ -50,3 +50,8 @@ public/*
 cache/*
 config.js
 videos.json
+/volume
+.vs/*
+.vscode/*
+*.m3u8
+sdk-demo-master.zip

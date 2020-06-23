@@ -2,3 +2,6 @@ ffmpeg -i "rtsp://admin:byt2016!@192.168.0.203/h264/ch1/main/av_stream" -c copy 
 
 
 ffmpeg -i rtsp://admin:q11111111@39.206.51.40/h264/ch1/sub/av_stream -y -f image2 -ss 10 -t 0.001 -s 640*320 ./test.jpg
+
+
+ffmpeg -re -rtsp_transport tcp -i "rtsp://admin:admin123@192.168.2.241/h264/ch1/main/av_stream" -f flv -vcodec libx264 -vprofile baseline -acodec aac -ar 44100 -strict -2 -ac 1 -f flv -s 640x380 -q 10 "rtmp://112.74.219.187:1935/live/livestream"

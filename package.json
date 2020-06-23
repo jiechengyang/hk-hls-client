@@ -13,10 +13,20 @@
   "author": "jiechengyang",
   "license": "ISC",
   "dependencies": {
+<<<<<<< HEAD
+=======
+    "baidu-aip-sdk": "^2.4.5",
+>>>>>>> a14e9331ba3ce9958758cd2d8ea2733022945395
     "dateformat": "^3.0.3",
     "fluent-ffmpeg": "^2.1.2",
     "hls-server": "^1.5.0",
     "node-cache": "^4.2.1",
     "validator": "^11.1.0"
+<<<<<<< HEAD
+=======
+  },
+  "devDependencies": {
+    "node-rtsp-stream": "0.0.8"
+>>>>>>> a14e9331ba3ce9958758cd2d8ea2733022945395
   }
 }
