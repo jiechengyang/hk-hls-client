@@ -18,8 +18,6 @@ const querystring = require('querystring');
 const hlsConfig = require('./config');
 const FileCache = require('./libs/FileCache');
 const cache = FileCache.getSingleton(__dirname + '/cache');
-<<<<<<< HEAD
-=======
 
 function AddVolume(volumeFile, volume, outputVolumeFile) {
     const ffmpeg = require('fluent-ffmpeg');
@@ -46,7 +44,6 @@ function AddVolume(volumeFile, volume, outputVolumeFile) {
         }).run();
 }
 
->>>>>>> a14e9331ba3ce9958758cd2d8ea2733022945395
 module.exports = [
     {
         route: 'api/video/get-live-url',
@@ -216,8 +213,6 @@ module.exports = [
         }
     },
     {
-<<<<<<< HEAD
-=======
         route: 'api/audio/amplify-volume',
         verbs: ['POST'],
         func: (controller) => {
@@ -254,7 +249,6 @@ module.exports = [
         }
     },
     {
->>>>>>> a14e9331ba3ce9958758cd2d8ea2733022945395
         route: 'api/video/list',
         verbs: ['GET', 'POST'],
         func: () => {
